@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPostPath } from '../lib/posts';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+<BaseLayout title="Ricardo Wang">
+  <h1>Ricardo Wang</h1>
+  <p class="lede">我的技术分享 | Ricardo's personal blog</p>
+
+  <ul class="post-list">
+    {posts.map((post) => (
+      <li>
+        <a href={getPostPath(post)}>{post.data.title}</a>
+        <p class="meta">
+          <time datetime={post.data.date.toISOString()}>
+            {post.data.date.toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+          {post.data.categories.length > 0 && ` · ${post.data.categories.join(', ')}`}
+        </p>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

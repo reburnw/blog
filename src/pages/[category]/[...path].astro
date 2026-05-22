@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPostPath } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+
+  return posts.map((post) => {
+    const urlPath = getPostPath(post).slice(1).split('/');
+    const [category, ...rest] = urlPath;
+
+    return {
+      params: {
+        category,
+        path: rest.join('/'),
+      },
+      props: { post },
+    };
+  });
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<BaseLayout title={post.data.title} lang={post.data.lang ?? 'en'}>
+  <article>
+    <h1>{post.data.title}</h1>
+    <p class="meta">
+      <time datetime={post.data.date.toISOString()}>
+        {post.data.date.toLocaleDateString(post.data.lang ?? 'zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+      </time>
+      {post.data.categories.length > 0 && ` · ${post.data.categories.join(', ')}`}
+    </p>
+    <Content />
+  </article>
+</BaseLayout>
